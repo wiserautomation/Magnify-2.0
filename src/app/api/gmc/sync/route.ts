@@ -1,3 +1,4 @@
+import { NextResponse } from 'next/server';
 import { fetchGmcProducts } from '@/lib/gmc/api';
 import { db } from '@/lib/firebase/firestore'; 
 import { doc, collection, writeBatch, serverTimestamp } from 'firebase/firestore';
