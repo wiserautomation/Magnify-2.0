@@ -21,6 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -56,7 +57,7 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between p-4 rounded-xl bg-black/40 border border-white/5">
                      <div className="space-y-1">
                         <p className="text-xs font-bold text-white">Full Autopilot</p>
-                        <p className="text-[10px] text-white/40">Automatically identify, test, and promote winning title variants with >95% confidence.</p>
+                        <p className="text-[10px] text-white/40">Automatically identify, test, and promote winning title variants with {'>'}95% confidence.</p>
                      </div>
                      <Switch checked={autopilot} onCheckedChange={setAutopilot} className="data-[state=checked]:bg-blue-600" />
                   </div>
@@ -184,7 +185,7 @@ export default function SettingsPage() {
                         <span className="text-white/40 uppercase">Daily API Calls</span>
                         <span>4.2k / 10k</span>
                      </div>
-                     <Progress value={42} className="h-1 bg-white/5 [&>div]:bg-emerald-500" />
+                     <Progress value={42} className="h-1 bg-white/5" indicatorClassName="bg-emerald-500" />
                   </div>
                   <Separator className="bg-white/5" />
                   <div className="space-y-2">
@@ -192,11 +193,11 @@ export default function SettingsPage() {
                         <span className="text-white/40 uppercase">AI Title Credits</span>
                         <span>14.5k / 20k</span>
                      </div>
-                     <Progress value={72} className="h-1 bg-white/5 [&>div]:bg-blue-600" />
+                     <Progress value={72} className="h-1 bg-white/5" indicatorClassName="bg-blue-600" />
                   </div>
                </div>
-               <Button className="w-full mt-8 bg-blue-600/10 text-blue-400 border border-blue-500/10 hover:bg-blue-600/20 text-[10px] font-bold uppercase tracking-widest h-9">
-                  Increase Quotas <ExternalLink className="w-3 h-3 ml-2" />
+               <Button className="w-full mt-8 bg-blue-600/10 text-blue-400 border border-blue-500/10 hover:bg-blue-600/20 text-[10px] font-bold uppercase tracking-widest h-9" asChild>
+                  <a href="#">Increase Quotas <ExternalLink className="w-3 h-3 ml-2" /></a>
                </Button>
             </Card>
          </div>

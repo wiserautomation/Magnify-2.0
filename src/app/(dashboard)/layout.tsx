@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 import { 
   BarChart3, 
   Package, 
@@ -16,6 +17,8 @@ import {
   ChevronRight,
   TrendingUp
 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -42,6 +45,9 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const { user, signOut } = useAuth();
+
+  // Dummy data for demonstration, replace with actual user data
+  const strat = { win: 75, lift: 12.5 };
 
   return (
     <div className="flex h-screen bg-[#050505] text-white">
@@ -104,6 +110,13 @@ export default function DashboardLayout({
                     <p className="text-xs font-semibold text-white/80 truncate leading-none mb-1">
                       {user?.displayName || 'User'}
                     </p>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-bold text-emerald-400">{strat.win}% Win</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden mb-1">
+                      <div className="h-full bg-gradient-to-r from-blue-600 to-emerald-500" style={{ width: `${strat.win}%` }} />
+                    </div>
+                    <p className="text-[10px] text-white/20 mb-1">Avg. Lift: <span className="text-blue-400">+{strat.lift}%</span></p>
                     <p className="text-[10px] text-white/30 truncate uppercase tracking-widest leading-none">
                       Free Account
                     </p>

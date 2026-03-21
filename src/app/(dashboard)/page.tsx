@@ -68,7 +68,7 @@ export default function DashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-               <Progress value={42} className="h-1 bg-white/5 [&>div]:bg-red-500" />
+               <Progress value={42} className="h-1 bg-white/5" />
                <p className="text-[10px] text-white/20">Last sync 2 hours ago</p>
             </CardContent>
          </Card>
