@@ -1,9 +1,10 @@
-import { NextResponse } from 'next/server';
 import { fetchGmcProducts } from '@/lib/gmc/api';
-import { db } from '@/lib/firebase/firestore'; // Note: Server-side usage requires firebase-admin for full security, 
-                                             // but for this v1 spike we use the standard db with appropriate rules.
+import { db } from '@/lib/firebase/firestore'; 
 import { doc, collection, writeBatch, serverTimestamp } from 'firebase/firestore';
 import { scoreTitle } from '@/lib/scoring/titleScorer';
+import { analyzeProductImage } from '@/lib/ai/vision';
+import { scoutMarketGaps } from '@/lib/ai/scouter';
+import { generateTitleVariants } from '@/lib/ai/engine';
 
 /**
  * API Route to trigger a catalog sync from GMC
@@ -19,17 +20,30 @@ export async function POST(req: Request) {
     // 1. Fetch from GMC
     const products = await fetchGmcProducts(merchantId, accessToken);
 
+    // 1.5. Scout for Market Gaps (for the category of the first product as sample)
+    const marketGaps = await scoutMarketGaps(products[0]?.category || 'General', ['Competitor1.com', 'Competitor2.com']);
+
     // 2. Batch write to Firestore
     const batch = writeBatch(db);
     const productsRef = collection(db, 'stores', storeId, 'products');
 
     for (const product of products) {
+      // Score Title
       const scoring = scoreTitle(product.title, product.brand);
+      
+      // Vision Analysis (Kill-Zone detection)
+      const vision = await analyzeProductImage(product.imageUrl);
+
       const productDoc = {
         ...product,
         storeId,
         titleScore: scoring.score,
         titleIssues: scoring.issues,
+        visionMetrics: {
+           isTruncated: vision.isTruncated,
+           centeringScore: vision.score,
+           recommendation: vision.recommendation
+        },
         syncAt: serverTimestamp(),
       };
       
