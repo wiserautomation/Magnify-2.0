@@ -2,9 +2,9 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { signInWithGoogle } from '@/lib/firebase/auth';
 import { motion } from 'framer-motion';
 import { 
   ArrowRight, 
@@ -19,12 +19,13 @@ import {
 
 export default function LandingPage() {
   const { user } = useAuth();
+  const router = useRouter();
 
-  const handleSignIn = async () => {
-    try {
-      await signInWithGoogle();
-    } catch (error) {
-      console.error('Sign-in failed:', error);
+  const handleLaunch = () => {
+    if (user) {
+      router.push('/dashboard');
+    } else {
+      router.push('/login');
     }
   };
 
@@ -47,20 +48,12 @@ export default function LandingPage() {
           </div>
 
           <div className="flex items-center gap-4">
-            {user ? (
-              <Link href="/dashboard">
-                <Button variant="outline" className="border-white/10 hover:bg-white/10 text-white">
-                  Dashboard
-                </Button>
-              </Link>
-            ) : (
-              <Button 
-                onClick={handleSignIn}
-                className="bg-blue-600 hover:bg-blue-500 text-white shadow-[0_0_20px_rgba(37,99,235,0.3)]"
-              >
-                Launch App
-              </Button>
-            )}
+            <Button 
+              onClick={handleLaunch}
+              className="bg-blue-600 hover:bg-blue-500 text-white shadow-[0_0_20px_rgba(37,99,235,0.3)]"
+            >
+              {user ? 'Dashboard' : 'Launch App'}
+            </Button>
           </div>
         </div>
       </nav>
@@ -95,10 +88,10 @@ export default function LandingPage() {
             <div className="flex flex-col md:flex-row items-center justify-center gap-4">
               <Button 
                 size="lg" 
-                onClick={handleSignIn}
+                onClick={handleLaunch}
                 className="h-14 px-8 text-lg bg-blue-600 hover:bg-blue-500 text-white min-w-[200px]"
               >
-                Start Free Trial <ArrowRight className="ml-2 w-5 h-5" />
+                {user ? 'Go to Dashboard' : 'Start Free Trial'} <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
               <Button 
                 variant="outline" 
