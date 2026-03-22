@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { type Product } from '@/types';
@@ -9,9 +9,12 @@ import {
   Filter, 
   ArrowUpRight, 
   Zap,
-  MoreVertical
+  MoreVertical,
+  Layers,
+  Sparkles,
+  Target
 } from 'lucide-react';
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -52,188 +55,146 @@ const MOCK_PRODUCTS: Product[] = [
 ];
 
 export default function ProductsPage() {
-  const { user } = useAuth();
   const [products] = useState<Product[]>(MOCK_PRODUCTS);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | 'critical' | 'optimized' | 'testing'>('all');
 
-  useEffect(() => {
-     if (!user) return;
-     // REALTIME FIRESTORE SYNC: 
-     // We assume storeId exists for this user. In a real app we'd fetch the storeId first.
-     // For this initial setup, we populate with mock.
-     // In a production environment, this is where you'd call getProductsRealtime.
-  }, [user]);
-
-  const filteredProducts = products.filter(p => {
-    const matchesSearch = p.title.toLowerCase().includes(search.toLowerCase());
-    if (filter === 'all') return matchesSearch;
-    if (filter === 'critical') return matchesSearch && p.titleScore < 40;
-    if (filter === 'optimized') return matchesSearch && p.titleScore >= 80;
-    if (filter === 'testing') return matchesSearch && p.status === 'testing';
-    return matchesSearch;
-  });
-
   return (
-    <div className="space-y-8">
-      {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight mb-2 uppercase">Catalog Core</h1>
-          <p className="text-white/40 text-sm">Managing {products.length} products across Google Merchant Center.</p>
+    <div className="space-y-10">
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-2">
+           <div className="flex items-center gap-2 text-blue-500 mb-2">
+              <Layers className="w-4 h-4" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.3em]">Catalog Intelligence</span>
+           </div>
+           <h1 className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-white/40">
+              Product <span className="text-blue-500">Inventory</span>
+           </h1>
+           <p className="text-white/30 text-sm max-w-xl">
+              Analyzing <span className="text-white/60">{MOCK_PRODUCTS.length} SKUs</span> for title-to-intent alignment.
+           </p>
         </div>
-        <div className="flex items-center gap-2">
-           <div className="relative group">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-blue-500 transition-colors" />
-              <input 
+        <div className="flex items-center gap-3">
+          <div className="relative group/search">
+             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/search:text-blue-500 transition-colors" />
+             <input 
+                type="text" 
+                placeholder="Search catalog..." 
+                className="bg-white/[0.03] border border-white/5 rounded-xl py-3 pl-10 pr-4 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 w-80 transition-all placeholder:text-white/10"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                type="text" 
-                placeholder="Search by title or GMC ID..." 
-                className="bg-zinc-900 border border-white/5 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500/50 w-full md:w-80 transition-all focus:bg-black"
-              />
-           </div>
-           <Button variant="outline" className="bg-zinc-900 border-white/5 text-white/60 hover:text-white">
-              <Filter className="w-4 h-4 mr-2" /> Filter
-           </Button>
+             />
+          </div>
+          <Button className="h-11 bg-blue-600 hover:bg-blue-500 text-white rounded-xl px-6 uppercase text-[10px] font-bold tracking-widest shadow-[0_0_20px_rgba(37,99,235,0.3)]">
+             Manual Import
+          </Button>
         </div>
-      </div>
+      </header>
 
-      {/* ── Tabs ────────────────────────────────────────────────────────────── */}
-      <div className="flex gap-2 p-1 bg-zinc-950 border border-white/5 rounded-2xl w-fit">
-         {[
-           { id: 'all', label: 'All Products' },
-           { id: 'critical', label: 'Critical Issues' },
-           { id: 'testing', label: 'Active Tests' },
-           { id: 'optimized', label: 'Optimized' }
-         ].map((t) => (
-           <button
-             key={t.id}
-             onClick={() => setFilter(t.id as 'all' | 'critical' | 'optimized' | 'testing')}
-             className={cn(
-               "px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all",
-               filter === t.id ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20" : "text-white/30 hover:text-white/60"
-             )}
-           >
-             {t.label}
-           </button>
-         ))}
-      </div>
-
-      {/* ── Product Grid ────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <AnimatePresence mode="popLayout">
-          {filteredProducts.map((product, idx) => (
-            <motion.div
-              layout
-              key={product.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ delay: idx * 0.05 }}
+      <section className="flex items-center gap-4">
+         {['all', 'critical', 'optimized', 'testing'].map((f) => (
+            <button
+               key={f}
+               onClick={() => setFilter(f as any)}
+               className={cn(
+                  "px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border",
+                  filter === f 
+                     ? "bg-blue-600 border-blue-500 text-white shadow-[0_0_15px_rgba(37,99,235,0.3)]" 
+                     : "bg-white/[0.03] border-white/5 text-white/40 hover:text-white/60 hover:border-white/10"
+               )}
             >
-              <Card className="bg-zinc-900/40 border-white/5 overflow-hidden group hover:border-white/10 transition-all duration-500 shadow-xl hover:shadow-2xl">
-                <CardContent className="p-0">
-                  {/* Thumbnail Row */}
-                  <div className="flex p-4 gap-4 border-b border-white/5 bg-black/20">
-                    <div className="w-16 h-16 rounded-lg bg-zinc-800 border border-white/10 shrink-0 overflow-hidden relative">
-                       <Image src={product.imageUrl} alt={product.title} width={64} height={64} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                       <div className="absolute top-1 right-1">
-                          <div className={cn("w-2 h-2 rounded-full", product.status === 'testing' ? "bg-amber-500 animate-pulse" : "bg-emerald-500")} />
-                       </div>
-                    </div>
-                    <div className="min-w-0 flex-1">
-                       <div className="flex items-center justify-between gap-2 mb-1">
-                          <Badge variant="outline" className="text-[9px] uppercase tracking-tighter border-white/10 text-white/40 h-4">
-                             GMC: #{product.gmcId}
-                          </Badge>
-                          {product.status === 'champion' && (
-                             <div className="flex items-center gap-1 text-[9px] font-bold text-emerald-400 uppercase tracking-widest">
-                                <Zap className="w-3 h-3 fill-current" /> Champion
-                             </div>
-                          )}
-                       </div>
-                       <h3 className="text-xs font-bold text-white/90 truncate group-hover:text-blue-400 transition-colors uppercase leading-relaxed">
-                          {product.title}
-                       </h3>
-                       <p className="text-[10px] text-white/30 truncate mt-1">{product.brand} • {product.category}</p>
-                    </div>
-                  </div>
+               {f}
+            </button>
+         ))}
+      </section>
 
-                  {/* Performance Data */}
-                  <div className="p-4 bg-gradient-to-b from-transparent to-black/20">
-                     <div className="flex items-center justify-between mb-4">
-                        <div className="space-y-1">
-                           <p className="text-[10px] text-white/30 uppercase font-bold tracking-widest">Efficiency</p>
-                           <div className="flex items-center gap-2">
-                              <span className="text-lg font-bold">{(product.ctr * 100).toFixed(2)}%</span>
-                              <span className={cn(
-                                "text-[10px] font-bold px-1 rounded",
-                                product.ctr > 2 ? "text-emerald-400 bg-emerald-500/10" : "text-amber-400 bg-amber-500/10"
-                              )}>
-                                 {product.ctr > 2 ? 'High' : 'Low'}
-                              </span>
-                           </div>
-                        </div>
-                        <div className="text-right space-y-1">
-                           <p className="text-[10px] text-white/30 uppercase font-bold tracking-widest">Title Score</p>
-                           <div className="flex items-center gap-2 justify-end">
-                              <span className="text-lg font-bold" style={{ color: getTitleScoreColor(product.titleScore) }}>
-                                 {product.titleScore}
-                              </span>
-                           </div>
-                        </div>
-                     </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+         <AnimatePresence>
+            {products.map((product, i) => (
+              <motion.div
+                key={product.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+              >
+                <Card className="bg-black/40 border-white/5 overflow-hidden group hover:border-white/10 transition-all rounded-3xl relative backdrop-blur-md shadow-2xl">
+                   <div className="absolute top-0 right-0 p-4 z-10">
+                      <Button size="icon" variant="ghost" className="h-8 w-8 rounded-lg bg-black/40 border border-white/5 opacity-0 group-hover:opacity-100 transition-opacity">
+                         <MoreVertical className="w-3 h-3 text-white/40" />
+                      </Button>
+                   </div>
+                   
+                   <div className="aspect-[16/10] relative overflow-hidden bg-zinc-900">
+                      <Image 
+                        src={product.imageUrl} 
+                        alt={product.title}
+                        fill
+                        className="object-cover group-hover:scale-110 transition-transform duration-700 opacity-60 group-hover:opacity-100"
+                      />
+                      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black to-transparent" />
+                      
+                      <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
+                         <div className="space-y-1">
+                            <p className="text-[9px] text-white/40 uppercase font-bold tracking-widest">{product.brand}</p>
+                            <h3 className="text-sm font-bold text-white line-clamp-1">{product.title}</h3>
+                         </div>
+                         <div className="text-right">
+                            <p className="text-[9px] text-white/40 uppercase font-bold tracking-widest leading-none mb-1">Score</p>
+                            <span className={cn(
+                               "text-lg font-bold leading-none",
+                               product.titleScore > 80 ? "text-emerald-400" : product.titleScore > 60 ? "text-blue-400" : "text-red-400"
+                            )}>{product.titleScore}</span>
+                         </div>
+                      </div>
+                   </div>
 
-                     <div className="space-y-4">
-                        <div className="space-y-2">
-                           <div className="flex justify-between text-[10px] font-bold tracking-tighter">
-                              <span className="text-white/20 uppercase">Optimization Status</span>
-                              <span style={{ color: getTitleScoreColor(product.titleScore) }}>{getTitleScoreLabel(product.titleScore)}</span>
-                           </div>
-                           <Progress 
-                             value={product.titleScore} 
-                             className="h-1 bg-white/5" 
-                             indicatorClassName={cn(
-                               product.titleScore < 50 ? "bg-red-500" : product.titleScore < 80 ? "bg-amber-500" : "bg-emerald-500"
-                             )}
-                           />
-                        </div>
+                   <div className="p-6 space-y-6">
+                      <div className="grid grid-cols-3 gap-4">
+                         <div className="space-y-1">
+                            <p className="text-[9px] text-white/20 uppercase font-bold tracking-widest leading-none">CTR</p>
+                            <p className="text-xs font-bold text-white/80">{product.ctr}%</p>
+                         </div>
+                         <div className="space-y-1">
+                            <p className="text-[9px] text-white/20 uppercase font-bold tracking-widest leading-none">Clicks</p>
+                            <p className="text-xs font-bold text-white/80">{product.clicks}</p>
+                         </div>
+                         <div className="space-y-1">
+                            <p className="text-[9px] text-white/20 uppercase font-bold tracking-widest leading-none">Revenue</p>
+                            <p className="text-xs font-bold text-emerald-400">€{product.revenue}</p>
+                         </div>
+                      </div>
 
-                        <div className="grid grid-cols-2 gap-4 border-t border-white/5 pt-4">
-                           <div>
-                              <p className="text-[9px] text-white/30 uppercase font-bold mb-1">Impact</p>
-                              <p className="text-xs font-bold text-blue-400">{product.impressions.toLocaleString()} <span className="text-[10px] font-normal text-white/20">Impr.</span></p>
-                           </div>
-                           <div className="text-right">
-                              <p className="text-[9px] text-white/30 uppercase font-bold mb-1">ROAS</p>
-                              <p className="text-xs font-bold text-white/80">{product.conversions} <span className="text-[10px] font-normal text-white/20">Conv.</span></p>
-                           </div>
-                        </div>
-                     </div>
-                  </div>
+                      <div className="space-y-2">
+                         <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-white/20">
+                            <span>Optimization Health</span>
+                            <span className={cn(
+                               product.titleScore > 80 ? "text-emerald-400" : product.titleScore > 60 ? "text-blue-400" : "text-red-400"
+                            )}>{getTitleScoreLabel(product.titleScore)}</span>
+                         </div>
+                         <Progress value={product.titleScore} className="h-1 bg-white/5 [&>div]:bg-blue-600" />
+                      </div>
 
-                  {/* Action Row */}
-                  <div className="p-3 bg-black flex items-center justify-between border-t border-white/5">
-                     <Button size="sm" variant="ghost" className="h-8 text-[10px] uppercase font-bold tracking-widest text-white/40 hover:text-white hover:bg-white/5 px-2">
-                        View Analytics <ArrowUpRight className="ml-1 w-3 h-3" />
-                     </Button>
-                     <div className="flex items-center gap-1">
-                        <Button size="sm" variant="outline" className="h-8 w-8 p-0 border-white/5 bg-zinc-900 group-hover:border-blue-500/30 transition-all">
-                           <Zap className="w-3.5 h-3.5 fill-current text-blue-500" />
-                        </Button>
-                        <Button size="sm" variant="outline" className="h-8 w-8 p-0 border-white/5 bg-zinc-900">
-                           <MoreVertical className="w-3.5 h-3.5 text-white/40" />
-                        </Button>
-                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </AnimatePresence>
+                      <div className="pt-2 flex items-center gap-2">
+                         <Button className="flex-1 h-10 bg-white/[0.03] hover:bg-white/5 border border-white/5 text-white/60 text-[10px] uppercase font-bold tracking-widest rounded-xl transition-all">
+                            Analyze DNA
+                         </Button>
+                         <Button className="h-10 px-4 bg-blue-600/10 border border-blue-500/20 text-blue-400 hover:bg-blue-600/20 rounded-xl transition-all">
+                             <Zap className="w-3.5 h-3.5" />
+                         </Button>
+                      </div>
+                   </div>
+                </Card>
+              </motion.div>
+            ))}
+         </AnimatePresence>
+      </div>
+
+      <div className="flex justify-center pt-8">
+         <Button variant="ghost" className="text-white/20 hover:text-white uppercase text-[10px] font-bold tracking-[0.3em] group">
+            Load More Transmissions
+            <ArrowUpRight className="ml-2 w-3 h-3 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+         </Button>
       </div>
     </div>
   );
 }
-
