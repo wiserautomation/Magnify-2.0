@@ -1,26 +1,22 @@
 'use client';
 
+import { cn } from '@/lib/utils';
 import React from 'react';
 import { 
   Lightbulb, 
   TrendingUp, 
   BarChart3, 
   Globe, 
-  Zap,
-  Info,
-  ChevronRight,
   Target,
-  Search,
+  ChevronRight,
   ArrowUpRight,
   Flame,
   MousePointer2,
   Trophy
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { motion } from 'framer-motion';
 
 const CATEGORY_INSIGHTS = [
@@ -113,7 +109,7 @@ export default function IntelligencePage() {
                     </div>
                     <div className="p-4 rounded-xl bg-black/40 border border-white/5 group-hover:border-blue-500/20 transition-all">
                        <p className="text-xs text-white/60 italic leading-relaxed">
-                          "{cat.insight}"
+                          &quot;{cat.insight}&quot;
                        </p>
                        <div className="mt-3 flex items-center gap-4">
                           <div className="flex items-center gap-1.5">
@@ -219,7 +215,7 @@ export default function IntelligencePage() {
                  </div>
                  <h4 className="text-sm font-bold mb-2 group-hover:text-blue-400">{feed.title}</h4>
                  <p className="text-xs text-white/40 leading-relaxed">
-                    "{feed.desc}"
+                    &quot;{feed.desc}&quot;
                  </p>
                  <div className="mt-4 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
                     <span className="text-[9px] text-white/20 uppercase font-bold tracking-widest">Added 12h ago</span>
@@ -233,6 +229,3 @@ export default function IntelligencePage() {
   );
 }
 
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(' ');
-}

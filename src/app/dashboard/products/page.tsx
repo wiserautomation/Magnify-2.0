@@ -1,79 +1,68 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
-import { getProductsRealtime } from '@/lib/firebase/firestore';
 import { type Product } from '@/types';
 import { 
   Search, 
   Filter, 
   ArrowUpRight, 
-  AlertCircle, 
-  CheckCircle2, 
-  Clock,
   Zap,
-  MoreVertical,
-  ExternalLink
+  MoreVertical
 } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { getTitleScoreColor, getTitleScoreLabel } from '@/lib/scoring/titleScorer';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
+
+const MOCK_PRODUCTS: Product[] = [
+  {
+    id: 'p1', storeId: 's1', gmcId: '123', 
+    title: 'Camping Tent', originalTitle: 'Camping Tent', currentTitle: 'Camping Tent',
+    description: 'A tent for camping.', imageUrl: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&q=80',
+    price: 199.99, currency: 'EUR', category: 'Outdoors', brand: 'Mountain', 
+    geography: 'ES', language: 'en', titleScore: 32, titleIssues: [], 
+    impressions: 4500, clicks: 12, ctr: 0.26, conversions: 0, revenue: 0, 
+    lastOptimizedAt: null, optimizationCount: 0, status: 'pending'
+  },
+  {
+    id: 'p2', storeId: 's1', gmcId: '124', 
+    title: 'Arc\'teryx Men\'s Beta AR Jacket - Black - Medium', 
+    originalTitle: 'AR Jacket', currentTitle: 'Arc\'teryx Men\'s Beta AR Jacket - Black - Medium',
+    description: 'Premium Gore-Tex jacket.', imageUrl: 'https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?auto=format&fit=crop&q=80',
+    price: 550.00, currency: 'EUR', category: 'Apparel', brand: 'Arc\'teryx', 
+    geography: 'ES', language: 'en', titleScore: 94, titleIssues: [], 
+    impressions: 12400, clicks: 520, ctr: 4.19, conversions: 12, revenue: 6600, 
+    lastOptimizedAt: new Date(), optimizationCount: 2, status: 'champion'
+  },
+  {
+    id: 'p3', storeId: 's1', gmcId: '125', 
+    title: 'Running Shoes Red', 
+    originalTitle: 'Running Shoes Red', currentTitle: 'Running Shoes Red',
+    description: 'Shoes for running.', imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80',
+    price: 89.00, currency: 'EUR', category: 'Footwear', brand: 'Nike', 
+    geography: 'ES', language: 'en', titleScore: 45, titleIssues: [], 
+    impressions: 8900, clicks: 89, ctr: 1.0, conversions: 2, revenue: 178, 
+    lastOptimizedAt: new Date(), optimizationCount: 1, status: 'testing'
+  }
+];
 
 export default function ProductsPage() {
   const { user } = useAuth();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [products] = useState<Product[]>(MOCK_PRODUCTS);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | 'critical' | 'optimized' | 'testing'>('all');
 
-  // For high-end demo purposes, we define some mock products if Firestore is empty
-  const mockProducts: Product[] = [
-    {
-      id: 'p1', storeId: 's1', gmcId: '123', 
-      title: 'Camping Tent', originalTitle: 'Camping Tent', currentTitle: 'Camping Tent',
-      description: 'A tent for camping.', imageUrl: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&q=80',
-      price: 199.99, currency: 'EUR', category: 'Outdoors', brand: 'Mountain', 
-      geography: 'ES', language: 'en', titleScore: 32, titleIssues: [], 
-      impressions: 4500, clicks: 12, ctr: 0.26, conversions: 0, revenue: 0, 
-      lastOptimizedAt: null, optimizationCount: 0, status: 'pending'
-    },
-    {
-      id: 'p2', storeId: 's1', gmcId: '124', 
-      title: 'Arc\'teryx Men\'s Beta AR Jacket - Black - Medium', 
-      originalTitle: 'AR Jacket', currentTitle: 'Arc\'teryx Men\'s Beta AR Jacket - Black - Medium',
-      description: 'Premium Gore-Tex jacket.', imageUrl: 'https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?auto=format&fit=crop&q=80',
-      price: 550.00, currency: 'EUR', category: 'Apparel', brand: 'Arc\'teryx', 
-      geography: 'ES', language: 'en', titleScore: 94, titleIssues: [], 
-      impressions: 12400, clicks: 520, ctr: 4.19, conversions: 12, revenue: 6600, 
-      lastOptimizedAt: new Date(), optimizationCount: 2, status: 'champion'
-    },
-    {
-      id: 'p3', storeId: 's1', gmcId: '125', 
-      title: 'Running Shoes Red', 
-      originalTitle: 'Running Shoes Red', currentTitle: 'Running Shoes Red',
-      description: 'Shoes for running.', imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80',
-      price: 89.00, currency: 'EUR', category: 'Footwear', brand: 'Nike', 
-      geography: 'ES', language: 'en', titleScore: 45, titleIssues: [], 
-      impressions: 8900, clicks: 89, ctr: 1.0, conversions: 2, revenue: 178, 
-      lastOptimizedAt: new Date(), optimizationCount: 1, status: 'testing'
-    }
-  ];
-
   useEffect(() => {
+     if (!user) return;
      // REALTIME FIRESTORE SYNC: 
      // We assume storeId exists for this user. In a real app we'd fetch the storeId first.
-     // For this initial setup, we populate with mock and then switch to Firestore.
-     setProducts(mockProducts);
-     setLoading(false);
-
-     // If storeId is known:
-     // return getProductsRealtime('store_id_placeholder', (data) => {
-     //    setProducts(data as Product[]);
-     //    setLoading(false);
-     // });
+     // For this initial setup, we populate with mock.
+     // In a production environment, this is where you'd call getProductsRealtime.
   }, [user]);
 
   const filteredProducts = products.filter(p => {
@@ -120,7 +109,7 @@ export default function ProductsPage() {
          ].map((t) => (
            <button
              key={t.id}
-             onClick={() => setFilter(t.id as any)}
+             onClick={() => setFilter(t.id as 'all' | 'critical' | 'optimized' | 'testing')}
              className={cn(
                "px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all",
                filter === t.id ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20" : "text-white/30 hover:text-white/60"
@@ -148,7 +137,7 @@ export default function ProductsPage() {
                   {/* Thumbnail Row */}
                   <div className="flex p-4 gap-4 border-b border-white/5 bg-black/20">
                     <div className="w-16 h-16 rounded-lg bg-zinc-800 border border-white/10 shrink-0 overflow-hidden relative">
-                       <img src={product.imageUrl} alt={product.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                       <Image src={product.imageUrl} alt={product.title} width={64} height={64} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                        <div className="absolute top-1 right-1">
                           <div className={cn("w-2 h-2 rounded-full", product.status === 'testing' ? "bg-amber-500 animate-pulse" : "bg-emerald-500")} />
                        </div>
@@ -248,7 +237,3 @@ export default function ProductsPage() {
   );
 }
 
-// Helper for class merging
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(' ');
-}

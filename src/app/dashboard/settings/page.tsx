@@ -2,24 +2,17 @@
 
 import React, { useState } from 'react';
 import { 
-  Settings, 
-  Shield, 
   Database, 
-  Bell, 
-  CreditCard, 
   Zap,
-  Globe,
   RefreshCw,
   Lock,
   ChevronRight,
   User as UserIcon,
   CheckCircle2,
-  Trash2,
   ExternalLink
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
@@ -206,6 +199,3 @@ export default function SettingsPage() {
   );
 }
 
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(' ');
-}

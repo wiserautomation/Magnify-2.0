@@ -1,4 +1,4 @@
-import type { TitleIssue, TitleIssueType } from '@/types';
+import type { TitleIssue } from '@/types';
 
 export interface ScoreResult {
   score: number; // 0–100

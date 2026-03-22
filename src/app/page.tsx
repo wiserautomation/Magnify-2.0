@@ -156,7 +156,7 @@ export default function LandingPage() {
           <div className="text-center mb-20">
             <h2 className="text-3xl md:text-5xl font-bold mb-6">Built Above the Line</h2>
             <p className="text-white/40 max-w-2xl mx-auto">
-              Magnify 2.0 isn't just a CRUD app. It's a collective intelligence network where every test result improves the platform for everyone.
+              Magnify 2.0 isn&apos;t just a CRUD app. It&apos;s a collective intelligence network where every test result improves the platform for everyone.
             </p>
           </div>
 

@@ -7,7 +7,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { 
-  BarChart3, 
   Package, 
   Zap, 
   Lightbulb, 
@@ -17,9 +16,6 @@ import {
   ChevronRight,
   TrendingUp
 } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
-import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,

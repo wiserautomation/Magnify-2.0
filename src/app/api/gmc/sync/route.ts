@@ -5,7 +5,6 @@ import { doc, collection, writeBatch, serverTimestamp } from 'firebase/firestore
 import { scoreTitle } from '@/lib/scoring/titleScorer';
 import { analyzeProductImage } from '@/lib/ai/vision';
 import { scoutMarketGaps } from '@/lib/ai/scouter';
-import { generateTitleVariants } from '@/lib/ai/engine';
 
 /**
  * API Route to trigger a catalog sync from GMC
@@ -22,7 +21,7 @@ export async function POST(req: Request) {
     const products = await fetchGmcProducts(merchantId, accessToken);
 
     // 1.5. Scout for Market Gaps (for the category of the first product as sample)
-    const marketGaps = await scoutMarketGaps(products[0]?.category || 'General', ['Competitor1.com', 'Competitor2.com']);
+    await scoutMarketGaps(products[0]?.category || 'General', ['Competitor1.com', 'Competitor2.com']);
 
     // 2. Batch write to Firestore
     const batch = writeBatch(db);
@@ -63,8 +62,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, count: products.length });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Core sync error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Unknown sync error';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

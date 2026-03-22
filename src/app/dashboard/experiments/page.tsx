@@ -1,29 +1,20 @@
 'use client';
 
 import React, { useState } from 'react';
+import { cn } from '@/lib/utils';
 import { 
   Zap, 
-  ArrowRight, 
-  Play, 
-  Pause, 
-  RotateCcw,
   BarChart3,
   TrendingUp,
   History,
-  Info,
-  ChevronRight,
   Filter,
-  Search,
   MoreVertical,
   Target
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { MOCK_STATS } from '@/lib/mock-data';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Button } from "@/components/ui/button";
+import { motion } from 'framer-motion';
 
 const MOCK_EXPERIMENTS = [
   {
@@ -116,7 +107,7 @@ export default function ExperimentsPage() {
                {['all', 'running', 'completed'].map(f => (
                  <button 
                    key={f}
-                   onClick={() => setFilter(f as any)}
+                   onClick={() => setFilter(f as 'all' | 'running' | 'completed')}
                    className={cn(
                      "text-[10px] font-bold uppercase tracking-widest transition-colors",
                      filter === f ? "text-blue-500" : "text-white/20 hover:text-white/40"
@@ -244,6 +235,3 @@ export default function ExperimentsPage() {
   );
 }
 
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(' ');
-}

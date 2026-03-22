@@ -5,19 +5,13 @@ import {
   Plus, 
   Search, 
   ArrowUpRight, 
-  TrendingUp, 
-  Clock, 
-  AlertCircle,
   Zap,
-  CheckCircle2,
   BarChart3
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { MOCK_STATS } from '@/lib/mock-data';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   AreaChart, 
   Area, 

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Zap, Mail, Lock, AlertCircle } from 'lucide-react';
+import { Mail, Lock, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function LoginPage() {
@@ -25,7 +25,7 @@ export default function LoginPage() {
     if (email === 'test@test.com' && password === '1234') {
       // Set demo cookie or localStorage flag
       localStorage.setItem('magnify_demo_mode', 'true');
-      router.push('/');
+      window.location.href = '/dashboard';
     } else {
       setError('Invalid credentials. Use test@test.com / 1234 for the demo.');
       setIsLoading(false);

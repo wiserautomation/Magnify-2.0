@@ -27,17 +27,28 @@ const DEMO_USER: MagnifyUser = {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
-  const [magnifyUser, setMagnifyUser] = useState<MagnifyUser | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [isDemo, setIsDemo] = useState(false);
+  const [isDemo, setIsDemo] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('magnify_demo_mode') === 'true';
+    }
+    return false;
+  });
+  const [magnifyUser, setMagnifyUser] = useState<MagnifyUser | null>(() => {
+    if (typeof window !== 'undefined' && localStorage.getItem('magnify_demo_mode') === 'true') {
+      return DEMO_USER;
+    }
+    return null;
+  });
+  const [loading, setLoading] = useState(() => {
+    if (typeof window !== 'undefined' && localStorage.getItem('magnify_demo_mode') === 'true') {
+      return false;
+    }
+    return true;
+  });
 
   useEffect(() => {
     // Check if demo mode is active
-    const demoMode = localStorage.getItem('magnify_demo_mode') === 'true';
-    if (demoMode) {
-      setMagnifyUser(DEMO_USER);
-      setIsDemo(true);
-      setLoading(false);
+    if (isDemo) {
       return;
     }
 
@@ -86,7 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [isDemo]);
 
   const signOut = async () => {
     localStorage.removeItem('magnify_demo_mode');

@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from '@/lib/firebase/auth';
 import { Button } from '@/components/ui/button';
@@ -11,20 +10,15 @@ import {
   ArrowRight, 
   CheckCircle2, 
   Cpu, 
-  ShieldCheck, 
-  RefreshCw,
   Loader2,
   ChevronRight,
   Database
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { createStore } from '@/lib/firebase/firestore';
 
 export default function OnboardingFlow() {
-  const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [merchantId, setMerchantId] = useState('');
   const [syncCount, setSyncCount] = useState(0);
 
   const handleConnect = async () => {
@@ -33,8 +27,7 @@ export default function OnboardingFlow() {
       // Re-trigger OAuth if scopes missing
       const provider = new GoogleAuthProvider();
       provider.addScope('https://www.googleapis.com/auth/content');
-      const result = await signInWithPopup(auth, provider);
-      const credential = GoogleAuthProvider.credentialFromResult(result);
+      await signInWithPopup(auth, provider);
       
       // In a real environment, we'd fetch the MerchantID via listGmcAccounts
       setStep(2);
@@ -147,7 +140,7 @@ export default function OnboardingFlow() {
                      <CheckCircle2 className="w-8 h-8" />
                   </div>
                   <CardTitle className="text-2xl font-bold uppercase tracking-tight">Sync Complete</CardTitle>
-                  <CardDescription className="text-white/40">We've imported and scored {syncCount} products.</CardDescription>
+                  <CardDescription className="text-white/40">We&apos;ve imported and scored {syncCount} products.</CardDescription>
                </CardHeader>
                <CardContent className="space-y-6 pb-8">
                   <div className="grid grid-cols-2 gap-3">
@@ -193,6 +186,3 @@ export default function OnboardingFlow() {
   );
 }
 
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(' ');
-}
